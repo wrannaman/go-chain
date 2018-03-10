@@ -32,14 +32,12 @@ type BlockData struct {
 	B int    `json:"b"`
 }
 
-// AddBlock to Blockchain struct
-func (chain *Blockchain) AddBlock(block Block) []Block {
+func (chain *Blockchain) addBlock(block Block) []Block {
 	chain.Blocks = append(chain.Blocks, block)
 	return chain.Blocks
 }
 
-// IsPrime is # prime
-func IsPrime(num int) bool {
+func isPrime(num int) bool {
 	for i := 2; i < num; i++ {
 		if num%i == 0 {
 			return false
@@ -60,14 +58,12 @@ func calculateHashForBlock(index int, previousHash string, timestamp time.Time, 
 	return hash
 }
 
-// GetGenesis gets a genesis block
-func GetGenesis() Block {
+func getGenesis() Block {
 	block := Block{0, "0", time.Now().UTC(), "{ name: 'Genesis Block', value: 0 }", "1d79e9eef321cac0aa8f73d1245a5604a8a665e6daacf64d1b9843e2ab98fa29", 745}
 	return block
 }
 
-// IsValidHashDifficulty check if hash is valid difficult
-func IsValidHashDifficulty(hash string) bool {
+func isValidHashDifficulty(hash string) bool {
 	totalCount := 0
 	charACount := 0
 
@@ -81,12 +77,11 @@ func IsValidHashDifficulty(hash string) bool {
 			totalCount += numberFromHash
 		}
 	}
-	isValid := IsPrime(totalCount) && charACount >= 10
+	isValid := isPrime(totalCount) && charACount >= 10
 	return isValid
 }
 
-//GenerateNextBlock gen block of chain
-func GenerateNextBlock(chain Blockchain, data BlockData) Block {
+func generateNextBlock(chain Blockchain, data BlockData) Block {
 	latestBlock := chain.Blocks[len(chain.Blocks)-1]
 	nextIndex := latestBlock.Index
 	previousHash := latestBlock.PreviousHash
@@ -94,7 +89,7 @@ func GenerateNextBlock(chain Blockchain, data BlockData) Block {
 	nonce := 0
 	nextHash := calculateHashForBlock(nextIndex, previousHash, timestamp, data, nonce, chain)
 
-	for !IsValidHashDifficulty(nextHash) {
+	for !isValidHashDifficulty(nextHash) {
 		nonce++
 		timestamp = time.Now().UTC()
 		nextHash = calculateHashForBlock(nextIndex, previousHash, timestamp, data, nonce, chain)
@@ -107,11 +102,10 @@ func GenerateNextBlock(chain Blockchain, data BlockData) Block {
 	return Block{nextIndex, previousHash, timestamp, string(bytes), nextHash, nonce}
 }
 
-// Mine new blocks
-func Mine(chain Blockchain, data BlockData) {
-	newBlock := GenerateNextBlock(chain, data)
-	// fmt.Println("newBlock", newBlock)
-	chain.AddBlock(newBlock)
+func mine(chain Blockchain, data BlockData) {
+	newBlock := generateNextBlock(chain, data)
+	fmt.Println("New block mined ", newBlock)
+	chain.addBlock(newBlock)
 }
 
 // Main intiailizes blockchain
@@ -124,15 +118,18 @@ func Main() {
 		{"test 4", 4},
 		{"test 5", 5},
 		{"test 6", 6},
-		{"test 13", 13},
+		{"test 7", 7},
+		{"test 8", 8},
+		{"test 9", 9},
+		{"test 10", 10},
 	}
-	initialBlock := GetGenesis()
+	initialBlock := getGenesis()
 	blocks := []Block{initialBlock}
 	Chain := Blockchain{blocks, 0, time.Now().UTC()}
 
 	for i := 0; i < len(chainToMine); i++ {
-		Mine(Chain, chainToMine[i])
+		mine(Chain, chainToMine[i])
 	}
 	duration := time.Since(start)
-	fmt.Println(duration.Seconds())
+	fmt.Println("took ", duration.Seconds(), " to mine ", len(chainToMine), " transactions")
 }
