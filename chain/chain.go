@@ -131,5 +131,5 @@ func Main() {
 		mine(Chain, chainToMine[i])
 	}
 	duration := time.Since(start)
-	fmt.Println("took ", duration.Seconds(), " to mine ", len(chainToMine), " transactions")
+	fmt.Println("Took", duration.Seconds(), "seconds to mine", len(chainToMine), "transactions.")
 }
